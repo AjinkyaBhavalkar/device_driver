@@ -1,0 +1,1 @@
+cmd_/home/pi/LDD/A2/ir-device/ir-dev.ko := ld -EL -r  -T ./scripts/module-common.lds --build-id  -o /home/pi/LDD/A2/ir-device/ir-dev.ko /home/pi/LDD/A2/ir-device/ir-dev.o /home/pi/LDD/A2/ir-device/ir-dev.mod.o

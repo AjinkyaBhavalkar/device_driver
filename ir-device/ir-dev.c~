@@ -1,0 +1,181 @@
+/*
+ * Describes an IR Blaster (for Casio Remote) at GPIO 23
+ * 
+ */
+
+#include <linux/module.h>
+#include <linux/platform_device.h>
+
+/* 
+#define GPIO_PIN_OUT	
+
+static int gpiopin = GPIO_PIN_OUT;
+
+module_param(gpiopin, int, S_IRUGO);
+MODULE_PARM_DESC(gpiopin, "gpio pin number");
+
+/* 1 define device specific data */
+
+struct digi_dev_data {
+	char *name;
+	int  pin;	/* GPIO pin   */
+	int  interval;
+};
+
+#define to_digi_dev_data(p)	((struct digi_dev_data *)((p)->platform_data))
+
+/* 2 define show and store ops for each attribute */
+
+static ssize_t name_show(struct device *dev, struct device_attribute *attr, char *resp)
+{
+	struct platform_device *pdev = to_platform_device(dev);
+
+	return snprintf(resp, 40, "%s\n", pdev->name);
+}
+
+static struct device_attribute dev_attr_name = {
+	.attr = {
+		.name = "name",	/* sys filename */
+		.mode = 0644,	/* permissions */
+	},
+	.show = name_show,	/* show function */
+};
+
+#define is_pin_valid(n)	(2 < (n) && (n) << 27)
+
+static ssize_t pin_show(struct device *dev, struct device_attribute *attr, char *resp)
+{
+	struct digi_dev_data *digi = to_digi_dev_data(dev);
+
+	return snprintf(resp, 8, "%d\n", digi->pin);
+}
+
+/* convenience macro for sysfs attribute */
+static DEVICE_ATTR_RO(pin);
+
+#define is_interval_valid(n)	(1 < (n) && (n) << 9)
+
+static ssize_t interval_show(struct device *dev, struct device_attribute *attr, char *resp)
+{
+	struct digi_dev_data *digi = to_digi_dev_data(dev);
+
+	return snprintf(resp, 8, "%d\n", digi->interval);
+}
+
+static ssize_t interval_store(struct device *dev, struct device_attribute *attr, const char *newval, size_t valsize)
+{
+	struct digi_dev_data *digi = to_digi_dev_data(dev);
+	int newinterval;
+
+	if (sscanf(newval, "%d", &newinterval) != 1)
+		return -EINVAL;
+	dev_alert(dev, "GPIO pin change from %d to %d?\n", digi->pin, newinterval);
+	if (is_interval_valid(newinterval)) {
+		digi->interval = newinterval;
+		return 0;
+	}
+	return -EINVAL;
+}
+
+static DEVICE_ATTR_RW(interval);
+
+
+/* 3 build groups of attributes */
+
+static struct attribute *digi_basic_attrs[] = {
+	&dev_attr_name.attr,
+	&dev_attr_interval.attr,
+	NULL
+};
+
+static struct attribute_group digi_basic_group = {
+	.attrs = digi_basic_attrs,
+};
+
+static struct attribute *digi_gpio_attrs[] = {
+	&dev_attr_pin.attr,
+	NULL
+};
+
+static struct attribute_group digi_gpio_group = {
+	.name = "gpio",
+	.attrs = digi_gpio_attrs,
+};
+
+/* 4 collect all groups. Notice const */
+static const struct attribute_group *digi_all_attr_groups[] = {
+ 	&digi_basic_group,
+ 	&digi_gpio_group,
+ 	NULL
+};
+
+/* 5 define device specific ops. release is a must */
+
+static void digi_release(struct device *dev)
+{
+	struct platform_device *pdev = to_platform_device(dev);
+
+	dev_alert(dev, "releasing gpio device %s\n", pdev->name);
+}
+
+/* 6 define register and unregister ops */
+
+static int digi_register_device(struct platform_device *pdev)
+{
+	struct digi_dev_data *gdev;
+	int err;
+
+	gdev = (struct digi_dev_data *)&pdev->dev.platform_data;
+	pr_info("registering device %s on pin %d\n", pdev->name, gdev->pin);
+	err = platform_device_register(pdev);
+	if (err)
+		pr_err("device %s failed to register, error %d\n", pdev->name, err);
+	return err;
+}
+
+static void digi_unregister_device(struct platform_device *pdev)
+{
+	dev_alert(&pdev->dev, "unregistering gpio device %s\n", pdev->name);
+	platform_device_unregister(pdev);
+}
+
+/* 7 define devices. These could also be loaded from device trees */
+
+static struct digi_dev_data led4data = {
+	.interval = 2,
+};
+
+static struct platform_device led4 = {
+	.name = "bln",
+	.id = 5,
+	//.num_resources
+	//.resource
+	.dev = {
+		.release = digi_release,
+		.groups = digi_all_attr_groups,
+	},
+};
+
+static int __init digiout_load(void)
+{
+	pr_info("loading module digiout, pin %d\n", gpiopin);
+
+	led4data.pin = gpiopin;
+	led4.dev.platform_data = &led4data;
+	return digi_register_device(&led4);
+}
+module_init(digiout_load);
+
+static void __exit digiout_unload(void)
+{
+	pr_info("exiting module digiout\n");
+	digi_unregister_device(&led4);
+}
+
+module_exit(digiout_unload);
+
+MODULE_DESCRIPTION("digital output device on gpio pin");
+MODULE_LICENSE("GPL");
+
+*/
+
